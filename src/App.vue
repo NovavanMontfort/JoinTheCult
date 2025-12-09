@@ -34,7 +34,7 @@ onMounted(() => {
   gsap.set(evenLines, { opacity: TYPE_LINE_OPACITY });
 
   const timeline = gsap.timeline({ repeat: -1, defaults: { ease: "customEase" } });
-  timeline.to(kineticEl, { duration: 1.4, scale: 2.7, rotation: -90 })
+  timeline.to(kineticEl, { duration: 1.4, scale: 2.3, rotation: -90 })
     .to(oddLines, { x: "20%", duration: 1, stagger: 0.08 }, "<")
     .to(evenLines, { x: "-20%", duration: 1, stagger: 0.08 }, "<")
     .to(oddLines, { x: "-200%", duration: 1.5, stagger: 0.08 }, ">")
@@ -81,7 +81,7 @@ onMounted(() => {
   white-space: nowrap;
   margin: 0;
   padding: 0;
-  line-height: 1;
+  line-height: 0.8; /* strakker dan 1 */
   font-weight: 800;
   color: #fff;
   text-rendering: optimizeLegibility;
@@ -90,6 +90,8 @@ onMounted(() => {
   will-change: transform, opacity;
   opacity: 1 !important;
 }
+
+
 
 .type-line.odd {
   color: #fff;
@@ -140,7 +142,7 @@ onMounted(() => {
     font-size: clamp(1.6rem, 8.5vw, 6rem);
   }
   #kinetic-type > .type-line {
-    line-height: 0.95;
+    line-height: 0.85;
   }
 }
 </style>
