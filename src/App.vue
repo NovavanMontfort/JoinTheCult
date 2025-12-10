@@ -75,11 +75,45 @@ export default {
     };
   },
   methods: {
+  scalePositions() {
+  const width = window.innerWidth;
+
+  this.textItems.forEach(item => {
+    const baseTop = parseFloat(item.top) || 0;
+    const baseLeft = item.left ? parseFloat(item.left) : null;
+    const baseRight = item.right ? parseFloat(item.right) : null;
+
+    if (width < 480) { // Mobiel: precies originele posities houden
+      item._scaledTop = `${baseTop}%`;
+      item._scaledLeft = baseLeft !== null ? `${baseLeft}%` : null;
+      item._scaledRight = baseRight !== null ? `${baseRight}%` : null;
+    } else if (width < 768) { // Tablet: lichte schaalverandering als je wilt
+      item._scaledTop = `${baseTop * 1.1}%`;
+      item._scaledLeft = baseLeft !== null ? `${baseLeft * 0.9 + 5}%` : null;
+      item._scaledRight = baseRight !== null ? `${baseRight * 0.9 + 5}%` : null;
+    } else { // Desktop: origineel
+      item._scaledTop = `${baseTop}%`;
+      item._scaledLeft = baseLeft !== null ? `${baseLeft}%` : null;
+      item._scaledRight = baseRight !== null ? `${baseRight}%` : null;
+    }
+  });
+},
+
+
+  itemStyle(item) {
+    return {
+      top: item._scaledTop || item.top,
+      left: item._scaledLeft || item.left,
+      right: item._scaledRight || item.right,
+      position: "absolute",
+    };
+  },
+
     itemStyle(item) {
       return {
-        top: item.top,
-        left: item.left,
-        right: item.right,
+        top: item._scaledTop || item.top,
+        left: item._scaledLeft || item.left,
+        right: item._scaledRight || item.right,
         position: "absolute",
       };
     },
@@ -93,7 +127,7 @@ export default {
           text: item.text,
           chars: "■▪▌▐▬",
           revealDelay: 0.5,
-          speed: 0.3, //glitch speed
+          speed: 0.2,
         },
         ease: "none",
         repeat: -1,
@@ -136,15 +170,13 @@ export default {
     startAutoHighlight() {
       if (this.autoHighlightInterval) return;
 
-      // Rechthoek animatie, alle items tegelijk
       this.autoHighlightInterval = setInterval(() => {
         this.autoHighlightActive = true;
 
         this.autoHighlightTimeout = setTimeout(() => {
           this.autoHighlightActive = false;
-        }, 1000); // rechthoek highlight duur
-
-      }, 5000); // interval rechthoek animatie
+        }, 1700);
+      }, 5000);
     },
 
     clearAutoHighlight() {
@@ -160,24 +192,19 @@ export default {
     },
 
     startRandomScrambles() {
-      // Zorg dat eerder gestarte intervals weg zijn
       this.scrambleIntervals.forEach(i => clearInterval(i));
       this.scrambleIntervals = [];
 
-      // Per item random scramble starten en stoppen met eigen timing
       this.textItems.forEach(item => {
         const el = this.$refs["textItem" + item.id];
         if (!el || !el[0]) return;
         const element = el[0];
 
-        // Interval met random delay tussen 4-12 sec
         const interval = setInterval(() => {
-          // Niet scrambelen als user hovered op dat item
           if (this.userHoveringId === item.id) return;
 
           this.startScramble(item, element);
 
-          // Stop scramble na random duur 1-3 sec
           setTimeout(() => {
             this.stopScramble(item);
           }, 1000 + Math.random() * 2000);
@@ -195,11 +222,14 @@ export default {
   },
 
   mounted() {
+    this.scalePositions();
+    window.addEventListener("resize", this.scalePositions);
     this.startAutoHighlight();
     this.startRandomScrambles();
   },
 
   beforeUnmount() {
+    window.removeEventListener("resize", this.scalePositions);
     this.clearAutoHighlight();
     this.stopAllScrambles();
   },
@@ -240,7 +270,7 @@ export default {
 
 .text-item {
   color: #838383;
-  font-size: 0.8rem;
+  font-size: clamp(0.6rem, 1.2vw, 1rem);
   text-transform: uppercase;
   opacity: 0.8;
   white-space: nowrap;
@@ -275,7 +305,18 @@ export default {
   width: calc(100% + 8px) !important;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
+
+/* Mobiel: tekst mag breken om beter zichtbaar te zijn */
+
+@media (max-width: 480px) {
+  .text-item {
+    font-size: clamp(0.5rem, 2vw, 0.9rem);
+  }
+}
+
+
 </style>
+
 
 
 
